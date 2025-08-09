@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { askEduBuddy } from './api';
 import {
   Send,
   BookOpen,
@@ -720,6 +721,7 @@ const [currentNote, setCurrentNote] = useState(null);
   };
   // Chat Functions
   const handleSend = async () => {
+     const data = await askEduBuddy(input);
     if (!input.trim()) return;
 
     const userMessage = {
