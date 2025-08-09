@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { askEduBuddy } from './api';
+
 import {
   Send,
   BookOpen,
@@ -697,53 +697,52 @@ const [currentNote, setCurrentNote] = useState(null);
       minute: "2-digit",
     }).format(date);
   };
-
   const getAIResponse = async (text) => {
-    const roleContext =
-      userRole === "teacher"
-        ? "You are EduBuddy assisting a teacher. Provide educational insights, curriculum guidance, student assessment help, and teaching strategies."
-        : "You are EduBuddy helping a student learn. Provide clear explanations, examples, and encourage learning.";
+  const roleContext = userRole === 'teacher' 
+    ? 'You are EduBuddy assisting a teacher. Provide educational insights, curriculum guidance, student assessment help, and teaching strategies.'
+    : 'You are EduBuddy helping a student learn. Provide clear explanations, examples, and encourage learning.';
+  
+  const fullPrompt = `${roleContext} Subject: ${subject}. Question: ${text}`;
 
-    const fullPrompt = `${roleContext} Subject: ${subject}. Question: ${text}`;
+  try {
+    const response = await fetch('http://localhost:5000/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: fullPrompt }),
+    });
 
-    try {
-      const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
-      const response = await fetch(`${API_BASE}/ask`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt}),
-      });
+    const data = await response.json();
+    return data.reply || '⚠️ No response from EduBuddy.';
+  } catch (error) {
+    return '⚠️ Sorry, I\'m having trouble connecting. Please try again!';
+  }
+};
 
-      const data = await response.json();
-      return data.reply || "⚠️ No response from EduBuddy.";
-    } catch (error) {
-      return "⚠️ Sorry, I'm having trouble connecting. Please try again!";
-    }
-  };
+
+  // Chat Functions
   // Chat Functions
   const handleSend = async () => {
-     const data = await askEduBuddy(input);
     if (!input.trim()) return;
 
-    const userMessage = {
+    const userMessage = { 
       id: messages.length + 1,
-      sender: "You",
-      text: input,
-      timestamp: new Date(),
+      sender: 'You', 
+      text: input, 
+      timestamp: new Date() 
     };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setLoading(true);
 
     const botReply = await getAIResponse(input);
-
-    const botMessage = {
+    
+    const botMessage = { 
       id: messages.length + 2,
-      sender: "EduBuddy",
-      text: botReply,
-      timestamp: new Date(),
+      sender: 'EduBuddy', 
+      text: botReply, 
+      timestamp: new Date() 
     };
-    setMessages((prev) => [...prev, botMessage]);
-    setInput("");
+    setMessages(prev => [...prev, botMessage]);
+    setInput('');
     setLoading(false);
   };
 
