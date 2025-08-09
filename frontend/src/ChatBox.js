@@ -707,10 +707,11 @@ const [currentNote, setCurrentNote] = useState(null);
     const fullPrompt = `${roleContext} Subject: ${subject}. Question: ${text}`;
 
     try {
-      const response = await fetch("http://localhost:5000/ask", {
+      const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+      const response = await fetch(`${API_BASE}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: fullPrompt }),
+        body: JSON.stringify({ prompt}),
       });
 
       const data = await response.json();
