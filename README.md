@@ -304,7 +304,7 @@ in the Software without restriction...
 
 - **React Team** - For the amazing framework
 - **Lucide Icons** - For beautiful icons
-- **OpenAI** - For AI integration possibilities
+- **Llama Groq AI** - For fast and powerful AI integration
 - **Education Community** - For inspiration and feedback
 
 ## 📞 Support & Contact
