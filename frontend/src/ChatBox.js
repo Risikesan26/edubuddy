@@ -713,7 +713,7 @@ const EduBuddyComplete = () => {
   const fullPrompt = `${roleContext} Subject: ${subject}. Question: ${text}`;
 
   try {
-    const response = await fetch('http://localhost:5000/ask', {
+    const response = await fetch('https://edubuddy-production.up.railway.app/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: fullPrompt }),
