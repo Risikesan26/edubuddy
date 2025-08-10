@@ -705,7 +705,10 @@ const EduBuddyComplete = () => {
       minute: "2-digit",
     }).format(date);
   };
-  const getAIResponse = async (text) => {
+
+  // Replace the getAIResponse function in your React component with this:
+
+const getAIResponse = async (text) => {
   const roleContext = userRole === 'teacher' 
     ? 'You are EduBuddy assisting a teacher. Provide educational insights, curriculum guidance, student assessment help, and teaching strategies.'
     : 'You are EduBuddy helping a student learn. Provide clear explanations, examples, and encourage learning.';
@@ -713,15 +716,24 @@ const EduBuddyComplete = () => {
   const fullPrompt = `${roleContext} Subject: ${subject}. Question: ${text}`;
 
   try {
+    // Updated URL - make sure this matches your Railway deployment URL
     const response = await fetch('https://edubuddy-production.up.railway.app/ask', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({ prompt: fullPrompt }),
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
     const data = await response.json();
     return data.reply || '⚠️ No response from EduBuddy.';
   } catch (error) {
+    console.error('API Error:', error);
     return '⚠️ Sorry, I\'m having trouble connecting. Please try again!';
   }
 };
