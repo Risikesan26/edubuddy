@@ -737,6 +737,7 @@ const getAIResponse = async (text) => {
     return '⚠️ Sorry, I\'m having trouble connecting. Please try again!';
   }
 };
+  
   const handleSend = async () => {
     if (!input.trim()) return;
 
