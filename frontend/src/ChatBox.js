@@ -706,38 +706,53 @@ const EduBuddyComplete = () => {
     }).format(date);
   };
 
-  // Replace the getAIResponse function in your React component with this:
-
-const getAIResponse = async (text) => {
+  const getAIResponse = async (text) => {
   const roleContext = userRole === 'teacher' 
     ? 'You are EduBuddy assisting a teacher. Provide educational insights, curriculum guidance, student assessment help, and teaching strategies.'
     : 'You are EduBuddy helping a student learn. Provide clear explanations, examples, and encourage learning.';
   
   const fullPrompt = `${roleContext} Subject: ${subject}. Question: ${text}`;
 
-  try {
-    // Updated URL - make sure this matches your Railway deployment URL
-    const response = await fetch('https://edubuddy-production.up.railway.app/ask', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ prompt: fullPrompt }),
-    });
+  // Try multiple API endpoints
+  const apiEndpoints = [
+    'https://edubuddy-production.up.railway.app/ask',
+    // Add backup endpoint if you have one
+  ];
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+  for (const endpoint of apiEndpoints) {
+    try {
+      console.log(`Trying API endpoint: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ prompt: fullPrompt }),
+      });
+
+      console.log(`Response status: ${response.status}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('API Response:', data);
+      return data.reply || '⚠️ No response from EduBuddy.';
+      
+    } catch (error) {
+      console.error(`API Error for ${endpoint}:`, error);
+      // Continue to next endpoint if available
+      continue;
     }
-
-    const data = await response.json();
-    return data.reply || '⚠️ No response from EduBuddy.';
-  } catch (error) {
-    console.error('API Error:', error);
-    return '⚠️ Sorry, I\'m having trouble connecting. Please try again!';
   }
+
+  // If all endpoints fail
+  return '⚠️ Sorry, I\'m having trouble connecting to the server. Please check your connection and try again!';
 };
-  
   const handleSend = async () => {
     if (!input.trim()) return;
 
