@@ -725,10 +725,6 @@ const EduBuddyComplete = () => {
     return '⚠️ Sorry, I\'m having trouble connecting. Please try again!';
   }
 };
-
-
-  // Chat Functions
-  // Chat Functions
   const handleSend = async () => {
     if (!input.trim()) return;
 
