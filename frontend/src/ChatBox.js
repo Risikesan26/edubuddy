@@ -34,6 +34,7 @@ const EduBuddyComplete = () => {
   // Core State
   const [currentView, setCurrentView] = useState("chat");
   const [userRole, setUserRole] = useState("student");
+  const [currentNote, setCurrentNote] = useState(null);
   const [currentUser, setCurrentUser] = useState({
     id: 1,
     name: "Risikesan",
@@ -57,11 +58,6 @@ const EduBuddyComplete = () => {
   const [subject, setSubject] = useState("General");
   const [showStarAnimation, setShowStarAnimation] = useState(false);
   const messagesEndRef = useRef(null);
-  // Notes State
-const [notes, setNotes] = useState([
-  { id: 1, title: 'Math Notes', content: '# Quadratic Equations\n\nRemember the formula: ax² + bx + c = 0', subject: 'Math', date: new Date() }
-]);
-const [currentNote, setCurrentNote] = useState(null);
   const [studyTimer, setStudyTimer] = useState({
   minutes: 25,
   seconds: 0,
@@ -69,9 +65,15 @@ const [currentNote, setCurrentNote] = useState(null);
   isBreak: false,
   sessions: 0
 });
-
-
-
+  // Replace the current notes state initialization
+  const [notes, setNotes] = useState({
+  student: [
+    { id: 1, title: 'Math Notes', content: '# Quadratic Equations\n\nRemember the formula: ax² + bx + c = 0', subject: 'Math', date: new Date() }
+  ],
+  teacher: [
+    { id: 2, title: 'Lesson Plan - Quadratic Equations', content: '# Teaching Plan\n\n## Objectives\n- Students will understand quadratic formula\n- Practice solving equations', subject: 'Math', date: new Date() }
+  ]
+});
   // User Progress & Analytics
   const [userStats, setUserStats] = useState({
     totalStars: 125,
@@ -236,6 +238,12 @@ const [currentNote, setCurrentNote] = useState(null);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Add this useEffect with your other useEffects
+  useEffect(() => {
+  setCurrentNote(null);
+}, [userRole]);
+  
 
   // Modern Styles - Dark Theme with Neon Accents - FIXED WHITE SPACE
   const styles = {
@@ -1942,118 +1950,130 @@ const [currentNote, setCurrentNote] = useState(null);
     </div>
   );
 
-  const renderNotes = () => (
-  <div style={{ display: 'flex', gap: '24px', height: 'calc(100vh - 200px)' }}>
-    {/* Notes Sidebar */}
-    <div style={{
-      width: '300px',
-      ...styles.card,
-      padding: '20px',
-      overflowY: 'auto'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h4 style={{ margin: 0, color: 'white' }}>Notes</h4>
-        <button
-          onClick={() => {
-            const newNote = {
-              id: Date.now(),
-              title: 'New Note',
-              content: '',
-              subject: subject,
-              date: new Date()
-            };
-            setNotes(prev => [newNote, ...prev]);
-            setCurrentNote(newNote);
-          }}
-          style={{ ...styles.button, padding: '8px 16px', fontSize: '12px' }}
-        >
-          + New
-        </button>
+  const renderNotes = () => {
+  const currentRoleNotes = notes[userRole] || [];
+  
+  return (
+    <div style={{ display: 'flex', gap: '24px', height: 'calc(100vh - 200px)' }}>
+      {/* Notes Sidebar */}
+      <div style={{
+        width: '300px',
+        ...styles.card,
+        padding: '20px',
+        overflowY: 'auto'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h4 style={{ margin: 0, color: 'white' }}>
+            {userRole === 'teacher' ? 'Lesson Notes' : 'Study Notes'}
+          </h4>
+          <button
+            onClick={() => {
+              const newNote = {
+                id: Date.now(),
+                title: userRole === 'teacher' ? 'New Lesson Plan' : 'New Note',
+                content: '',
+                subject: subject,
+                date: new Date()
+              };
+              setNotes(prev => ({
+                ...prev,
+                [userRole]: [newNote, ...(prev[userRole] || [])]
+              }));
+              setCurrentNote(newNote);
+            }}
+            style={{ ...styles.button, padding: '8px 16px', fontSize: '12px' }}
+          >
+            + New
+          </button>
+        </div>
+        
+        {currentRoleNotes.map(note => (
+          <div
+            key={note.id}
+            onClick={() => setCurrentNote(note)}
+            style={{
+              padding: '12px',
+              borderRadius: '8px',
+              marginBottom: '8px',
+              cursor: 'pointer',
+              background: currentNote?.id === note.id 
+                ? 'rgba(120, 119, 198, 0.3)' 
+                : 'rgba(120, 119, 198, 0.1)',
+              border: `1px solid ${currentNote?.id === note.id ? 'rgba(120, 119, 198, 0.5)' : 'rgba(120, 119, 198, 0.2)'}`,
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <div style={{ fontWeight: '600', color: 'white', fontSize: '14px' }}>
+              {note.title}
+            </div>
+            <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginTop: '4px' }}>
+              {note.subject} • {note.date.toLocaleDateString()}
+            </div>
+          </div>
+        ))}
       </div>
-      
-      {notes.map(note => (
-        <div
-          key={note.id}
-          onClick={() => setCurrentNote(note)}
-          style={{
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '8px',
-            cursor: 'pointer',
-            background: currentNote?.id === note.id 
-              ? 'rgba(120, 119, 198, 0.3)' 
-              : 'rgba(120, 119, 198, 0.1)',
-            border: `1px solid ${currentNote?.id === note.id ? 'rgba(120, 119, 198, 0.5)' : 'rgba(120, 119, 198, 0.2)'}`,
-            transition: 'all 0.3s ease'
-          }}
-        >
-          <div style={{ fontWeight: '600', color: 'white', fontSize: '14px' }}>
-            {note.title}
+
+      {/* Note Editor */}
+      <div style={{ flex: 1, ...styles.card, padding: '20px' }}>
+        {currentNote ? (
+          <>
+            <input
+              value={currentNote.title}
+              onChange={(e) => {
+                const updatedNote = { ...currentNote, title: e.target.value };
+                setCurrentNote(updatedNote);
+                setNotes(prev => ({
+                  ...prev,
+                  [userRole]: (prev[userRole] || []).map(n => n.id === updatedNote.id ? updatedNote : n)
+                }));
+              }}
+              style={{
+                ...styles.input,
+                fontSize: '20px',
+                fontWeight: '700',
+                marginBottom: '16px',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid rgba(120, 119, 198, 0.3)'
+              }}
+              placeholder={userRole === 'teacher' ? 'Lesson title...' : 'Note title...'}
+            />
+            
+            <textarea
+              value={currentNote.content}
+              onChange={(e) => {
+                const updatedNote = { ...currentNote, content: e.target.value };
+                setCurrentNote(updatedNote);
+                setNotes(prev => ({
+                  ...prev,
+                  [userRole]: (prev[userRole] || []).map(n => n.id === updatedNote.id ? updatedNote : n)
+                }));
+              }}
+              style={{
+                width: '100%',
+                height: 'calc(100% - 100px)',
+                padding: '16px',
+                background: 'rgba(26, 26, 46, 0.6)',
+                border: '1px solid rgba(120, 119, 198, 0.3)',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '15px',
+                resize: 'none',
+                outline: 'none'
+              }}
+              placeholder={userRole === 'teacher' ? 'Start writing your lesson plan...' : 'Start writing your notes...'}
+            />
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', marginTop: '100px' }}>
+            <FileText size={64} style={{ marginBottom: '16px' }} />
+            <h3>Select a {userRole === 'teacher' ? 'lesson plan' : 'note'} to edit or create a new one</h3>
           </div>
-          <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginTop: '4px' }}>
-            {note.subject} • {note.date.toLocaleDateString()}
-          </div>
-        </div>
-      ))}
+        )}
+      </div>
     </div>
-
-    {/* Note Editor */}
-    <div style={{ flex: 1, ...styles.card, padding: '20px' }}>
-      {currentNote ? (
-        <>
-          <input
-            value={currentNote.title}
-            onChange={(e) => {
-              const updatedNote = { ...currentNote, title: e.target.value };
-              setCurrentNote(updatedNote);
-              setNotes(prev => prev.map(n => n.id === updatedNote.id ? updatedNote : n));
-            }}
-            style={{
-              ...styles.input,
-              fontSize: '20px',
-              fontWeight: '700',
-              marginBottom: '16px',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: '2px solid rgba(120, 119, 198, 0.3)'
-            }}
-            placeholder="Note title..."
-          />
-          
-          <textarea
-            value={currentNote.content}
-            onChange={(e) => {
-              const updatedNote = { ...currentNote, content: e.target.value };
-              setCurrentNote(updatedNote);
-              setNotes(prev => prev.map(n => n.id === updatedNote.id ? updatedNote : n));
-            }}
-            style={{
-              width: '100%',
-              height: 'calc(100% - 100px)',
-              padding: '16px',
-              background: 'rgba(26, 26, 46, 0.6)',
-              border: '1px solid rgba(120, 119, 198, 0.3)',
-              borderRadius: '12px',
-              color: 'white',
-              fontSize: '15px',
-              resize: 'none',
-              outline: 'none'
-            }}
-            placeholder="Start writing your notes..."
-          />
-        </>
-      ) : (
-        <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', marginTop: '100px' }}>
-          <FileText size={64} style={{ marginBottom: '16px' }} />
-          <h3>Select a note to edit or create a new one</h3>
-        </div>
-      )}
-    </div>
-  </div>
-);
-
-
-
+  );
+};
   const renderAnalytics = () => (
     <div>
       <div style={styles.grid}>
